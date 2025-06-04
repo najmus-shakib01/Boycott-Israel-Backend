@@ -53,7 +53,7 @@ INSTALLED_APPS = [
     'products',
     'blob',
     'contact',
-    'websiteVisiotr',
+    'visitor',
     #third-party
     'rest_framework',
     'corsheaders',
