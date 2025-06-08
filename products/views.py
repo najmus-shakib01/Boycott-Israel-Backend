@@ -40,7 +40,7 @@ class ProductListCreateView(generics.ListCreateAPIView):
     search_fields = ['description', 'company__name']
 
     def get_queryset(self):
-        queryset = Product.objects.all()
+        queryset = Product.objects.all().order_by('-created_at') 
         category = self.request.query_params.get('category')
         company = self.request.query_params.get('company')
         search = self.request.query_params.get('search')
