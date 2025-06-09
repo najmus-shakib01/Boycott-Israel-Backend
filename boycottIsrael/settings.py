@@ -33,6 +33,8 @@ ALLOWED_HOSTS = ["127.0.0.1", ".vercel.app"]
 
 CORS_ALLOWED_ORIGINS = [
     "https://boycott-israels.vercel.app",
+    "http://localhost:5173",
+    "http://localhost:5174",
 ]
 
 CORS_ALLOW_ALL_ORIGINS = False
