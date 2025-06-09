@@ -23,24 +23,28 @@ class ProductPagination(PageNumberPagination):
 class CategoryListCreateView(generics.ListCreateAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
-    search_fields = ['name']
 
 class CompanyListCreateView(generics.ListCreateAPIView):
     queryset = Company.objects.all()
     serializer_class = CompanySerializer
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
-    search_fields = ['name']
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        search = self.request.query_params.get('search')
+        
+        if search:
+            queryset = queryset.filter(name__istartswith=search)
+        
+        return queryset
+    
 class ProductListCreateView(generics.ListCreateAPIView):
     serializer_class = ProductSerializer
     pagination_class = ProductPagination
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ['category__name', 'company__name']
-    search_fields = ['description', 'company__name']
 
     def get_queryset(self):
-        queryset = Product.objects.all().order_by('-created_at') 
+        queryset = Product.objects.all().order_by('-created_at')
         category = self.request.query_params.get('category')
         company = self.request.query_params.get('company')
         search = self.request.query_params.get('search')
@@ -50,8 +54,8 @@ class ProductListCreateView(generics.ListCreateAPIView):
         if company and company != "all":
             queryset = queryset.filter(company__name=company)
         if search:
-            queryset = queryset.filter(description__icontains=search)
-
+            queryset = queryset.filter(company__name__istartswith=search)
+        
         return queryset
 
 class ProductRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
