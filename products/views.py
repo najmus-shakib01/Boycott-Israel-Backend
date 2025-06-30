@@ -26,6 +26,7 @@ class CategoryListCreateView(generics.ListCreateAPIView):
 
 class CompanyListCreateView(generics.ListCreateAPIView):
     queryset = Company.objects.all()
+    pagination_class = ProductPagination
     serializer_class = CompanySerializer
 
     def get_queryset(self):
