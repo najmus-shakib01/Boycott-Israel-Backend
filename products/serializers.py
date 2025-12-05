@@ -14,9 +14,27 @@ class CompanySerializer(serializers.ModelSerializer):
 class ProductSerializer(serializers.ModelSerializer):
     company = CompanySerializer(read_only=True)
     category = CategorySerializer(read_only=True)
-    company_id = serializers.PrimaryKeyRelatedField(queryset=Company.objects.all(), source='company', write_only=True)
-    category_id = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), source='category', write_only=True)
+
+    company_id = serializers.PrimaryKeyRelatedField(
+        queryset=Company.objects.all(),
+        source='company',
+        write_only=True
+    )
+    category_id = serializers.PrimaryKeyRelatedField(
+        queryset=Category.objects.all(),
+        source='category',
+        write_only=True
+    )
 
     class Meta:
         model = Product
-        fields = ['id', 'company', 'company_id', 'description', 'category', 'category_id', 'owned_by', 'created_at']
+        fields = [
+            'id',
+            'company',
+            'company_id',
+            'description',
+            'category',
+            'category_id',
+            'owned_by',
+            'created_at',
+        ]

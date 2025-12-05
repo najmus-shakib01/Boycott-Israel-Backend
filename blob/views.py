@@ -19,27 +19,37 @@ class CustomPagination(PageNumberPagination):
             'previous': self.get_previous_link(),
             'results': data,
         })
-    
+
 class BlobPhotoListCreateView(generics.ListCreateAPIView):
-    queryset = BlobPhoto.objects.all().order_by('-created_at')
     serializer_class = BlobPhotoSerializer
     pagination_class = CustomPagination
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     search_fields = ['photoTitle']
 
+    def get_queryset(self):
+        queryset = BlobPhoto.objects.all().only(
+            "id", "photoTitle", "photo", "created_at"
+        ).order_by("-created_at")
+        return queryset
+
 class BlobPhotoRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = BlobPhoto.objects.all()
+    queryset = BlobPhoto.objects.all().only("id", "photoTitle", "photo", "created_at")
     serializer_class = BlobPhotoSerializer
     lookup_field = 'pk'
 
 class BlobVideoListCreateView(generics.ListCreateAPIView):
-    queryset = BlobVideo.objects.all().order_by('-created_at')
     serializer_class = BlobVideoSerializer
     pagination_class = CustomPagination
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     search_fields = ['videoTitle']
 
+    def get_queryset(self):
+        queryset = BlobVideo.objects.all().only(
+            "id", "videoTitle", "video", "created_at"
+        ).order_by("-created_at")
+        return queryset
+
 class BlobVideoRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = BlobVideo.objects.all()
+    queryset = BlobVideo.objects.all().only("id", "videoTitle", "video", "created_at")
     serializer_class = BlobVideoSerializer
     lookup_field = 'pk'
