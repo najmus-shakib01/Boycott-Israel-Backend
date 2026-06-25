@@ -1,6 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.throttling import ScopedRateThrottle
 from .serializers import ContactFormSerializer
 from django.core.mail import EmailMessage
 import logging
@@ -8,6 +9,9 @@ logger = logging.getLogger(__name__)
 import os
 
 class ContactFormView(APIView):
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'contact'
+
     def post(self, request):
         serializer = ContactFormSerializer(data=request.data)
         if serializer.is_valid():
