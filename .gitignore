@@ -148,8 +148,8 @@ Thumbs.db
 # Database migrations (uncomment if you want to version control migrations)
 # migrations/
 
-# Static files collected by collectstatic
-staticfiles/
+# Static files collected by collectstatic (needed for Vercel deployment)
+# staticfiles/
 
 # Local development environment files
 .env.local
