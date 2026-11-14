@@ -1,3 +1,5 @@
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_control, cache_page
 from rest_framework import generics, filters
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.pagination import PageNumberPagination
@@ -20,10 +22,13 @@ class ProductPagination(PageNumberPagination):
             'previous': self.get_previous_link(),
         })
 
+@method_decorator(cache_page(60 * 15), name='get')
+@method_decorator(cache_control(public=True, max_age=300, s_maxage=1800, stale_while_revalidate=86400), name='get')
 class CategoryListCreateView(generics.ListCreateAPIView):
     queryset = Category.objects.all().only("id", "name")
     serializer_class = CategorySerializer
 
+@method_decorator(cache_control(public=True, max_age=60, s_maxage=300, stale_while_revalidate=86400), name='get')
 class CompanyListCreateView(generics.ListCreateAPIView):
     serializer_class = CompanySerializer
     pagination_class = ProductPagination
@@ -37,6 +42,7 @@ class CompanyListCreateView(generics.ListCreateAPIView):
 
         return queryset
 
+@method_decorator(cache_control(public=True, max_age=60, s_maxage=300, stale_while_revalidate=86400), name='get')
 class ProductListCreateView(generics.ListCreateAPIView):
     serializer_class = ProductSerializer
     pagination_class = ProductPagination
@@ -65,7 +71,7 @@ class ProductListCreateView(generics.ListCreateAPIView):
 
         return queryset
 
-
+@method_decorator(cache_control(public=True, max_age=120, s_maxage=600, stale_while_revalidate=86400), name='get')
 class ProductRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.select_related("company", "category").all()
     serializer_class = ProductSerializer

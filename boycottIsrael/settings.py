@@ -42,6 +42,10 @@ CORS_ALLOW_ALL_ORIGINS = False
 # Application definition
 
 INSTALLED_APPS = [
+    # unfold theme (must be before django.contrib.admin)
+    'unfold',
+    'unfold.contrib.filters',
+    'unfold.contrib.forms',
     #whitenoise
     'whitenoise.runserver_nostatic', 
     #pre
@@ -120,8 +124,20 @@ DATABASES = {
         "PASSWORD": env("DB_PASSWORD"),
         "HOST": env("DB_HOST"),
         "PORT": env("DB_PORT"),
+        "CONN_MAX_AGE": env.int("DB_CONN_MAX_AGE", default=600),
+        "CONN_HEALTH_CHECKS": True,
     }
 }
+
+# Caching Configuration
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "boycott-israel-cache",
+        "TIMEOUT": 300,
+    }
+}
+
 
 
 # Password validation
@@ -181,3 +197,95 @@ EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 EMAIL_HOST_USER = env('EMAIL')
 EMAIL_HOST_PASSWORD = env('EMAIL_PASSWORD')
+
+# Supabase Storage Configuration
+SUPABASE_URL = env('SUPABASE_URL', default='https://hsacrlaaucymzmctggwp.supabase.co')
+SUPABASE_SERVICE_ROLE_KEY = env('SUPABASE_SERVICE_ROLE_KEY', default='')
+SUPABASE_STORAGE_BUCKET = env('SUPABASE_STORAGE_BUCKET', default='media')
+
+from django.urls import reverse_lazy
+
+# Unfold Admin Theme Configuration
+UNFOLD = {
+    "SITE_TITLE": "বয়কট ইসরায়েল ড্যাশবোর্ড",
+    "SITE_HEADER": "বয়কট ইসরায়েল",
+    "SITE_SUBHEADER": "অ্যাডমিন কন্ট্রোল প্যানেল",
+    "SITE_SYMBOL": "shield",
+    "SHOW_HISTORY": True,
+    "SHOW_VIEW_ON_SITE": True,
+    "COLORS": {
+        "primary": {
+            "50": "236 253 245",
+            "100": "209 250 229",
+            "200": "167 243 208",
+            "300": "110 231 183",
+            "400": "52 211 153",
+            "500": "16 185 129",
+            "600": "5 150 105",
+            "700": "4 120 87",
+            "800": "6 95 70",
+            "900": "6 78 59",
+            "950": "2 44 34",
+        },
+    },
+    "SIDEBAR": {
+        "show_search": True,
+        "show_all_applications": True,
+        "navigation": [
+            {
+                "title": "পণ্য ও ব্র্যান্ড ব্যবস্থাপনা",
+                "separator": True,
+                "items": [
+                    {
+                        "title": "কোম্পানি ও ব্র্যান্ড",
+                        "icon": "corporate_fare",
+                        "link": reverse_lazy("admin:products_company_changelist"),
+                    },
+                    {
+                        "title": "পণ্যসমূহ",
+                        "icon": "inventory_2",
+                        "link": reverse_lazy("admin:products_product_changelist"),
+                    },
+                    {
+                        "title": "ক্যাটাগরি",
+                        "icon": "category",
+                        "link": reverse_lazy("admin:products_category_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": "গ্যালারি ও মিডিয়া",
+                "separator": True,
+                "items": [
+                    {
+                        "title": "গাজার ফটো",
+                        "icon": "photo_library",
+                        "link": reverse_lazy("admin:blob_blobphoto_changelist"),
+                    },
+                    {
+                        "title": "গাজার ভিডিও",
+                        "icon": "video_library",
+                        "link": reverse_lazy("admin:blob_blobvideo_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": "ব্যবহারকারী ও নিরাপত্তা",
+                "separator": True,
+                "items": [
+                    {
+                        "title": "অ্যাডমিন ইউজার",
+                        "icon": "group",
+                        "link": reverse_lazy("admin:auth_user_changelist"),
+                    },
+                    {
+                        "title": "রোল ও পারমিশন",
+                        "icon": "security",
+                        "link": reverse_lazy("admin:auth_group_changelist"),
+                    },
+                ],
+            },
+        ],
+    },
+}
+

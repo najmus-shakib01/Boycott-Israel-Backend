@@ -1,3 +1,5 @@
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_control
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework import generics, filters
@@ -20,6 +22,7 @@ class CustomPagination(PageNumberPagination):
             'results': data,
         })
 
+@method_decorator(cache_control(public=True, max_age=120, s_maxage=600, stale_while_revalidate=86400), name='get')
 class BlobPhotoListCreateView(generics.ListCreateAPIView):
     serializer_class = BlobPhotoSerializer
     pagination_class = CustomPagination
@@ -32,11 +35,13 @@ class BlobPhotoListCreateView(generics.ListCreateAPIView):
         ).order_by("-created_at")
         return queryset
 
+@method_decorator(cache_control(public=True, max_age=300, s_maxage=1800, stale_while_revalidate=86400), name='get')
 class BlobPhotoRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = BlobPhoto.objects.all().only("id", "photoTitle", "photo", "created_at")
     serializer_class = BlobPhotoSerializer
     lookup_field = 'pk'
 
+@method_decorator(cache_control(public=True, max_age=120, s_maxage=600, stale_while_revalidate=86400), name='get')
 class BlobVideoListCreateView(generics.ListCreateAPIView):
     serializer_class = BlobVideoSerializer
     pagination_class = CustomPagination
@@ -49,6 +54,7 @@ class BlobVideoListCreateView(generics.ListCreateAPIView):
         ).order_by("-created_at")
         return queryset
 
+@method_decorator(cache_control(public=True, max_age=300, s_maxage=1800, stale_while_revalidate=86400), name='get')
 class BlobVideoRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = BlobVideo.objects.all().only("id", "videoTitle", "video", "created_at")
     serializer_class = BlobVideoSerializer
