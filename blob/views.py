@@ -1,11 +1,39 @@
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_control
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
+from rest_framework.reverse import reverse
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework import generics, filters
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import BlobPhoto, BlobVideo
 from .serializers import BlobPhotoSerializer, BlobVideoSerializer
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def blob_root(request, format=None):
+    """
+    Blob & Media Gallery API Root
+    Directory of endpoints for Gaza photo and video gallery.
+    """
+    return Response({
+        "status": True,
+        "message": "Blob Media Gallery API Root",
+        "data": {
+            "photos": {
+                "url": reverse('blob-photo', request=request, format=format),
+                "methods": ["GET", "POST"],
+                "description": "গাজার ফটো গ্যালারির তালিকা (ফিল্টার: search=photoTitle, page=1)",
+            },
+            "videos": {
+                "url": reverse('blob-video', request=request, format=format),
+                "methods": ["GET", "POST"],
+                "description": "গাজার ভিডিও গ্যালারির তালিকা (ফিল্টার: search=videoTitle, page=1)",
+            },
+        }
+    })
+
 
 class CustomPagination(PageNumberPagination):
     page_size = 20

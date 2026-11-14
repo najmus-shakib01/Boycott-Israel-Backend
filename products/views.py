@@ -1,11 +1,44 @@
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_control, cache_page
 from rest_framework import generics, filters
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
+from rest_framework.reverse import reverse
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from .models import Category, Company, Product
 from .serializers import CategorySerializer, CompanySerializer, ProductSerializer
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def products_root(request, format=None):
+    """
+    Products API Root
+    Directory of endpoints for products, categories, and companies.
+    """
+    return Response({
+        "status": True,
+        "message": "Products API Root",
+        "data": {
+            "products_list": {
+                "url": reverse('product-list', request=request, format=format),
+                "methods": ["GET", "POST"],
+                "description": "পণ্যসমূহের তালিকা (ফিল্টার: category, company, search, page)",
+            },
+            "categories": {
+                "url": reverse('category-list', request=request, format=format),
+                "methods": ["GET", "POST"],
+                "description": "সমস্ত পণ্যের ক্যাটাগরির তালিকা",
+            },
+            "companies": {
+                "url": reverse('company-list', request=request, format=format),
+                "methods": ["GET", "POST"],
+                "description": "কোম্পানি ও ব্র্যান্ডের তালিকা এবং লোগো",
+            },
+        }
+    })
+
 
 class ProductPagination(PageNumberPagination):
     page_size = 20
