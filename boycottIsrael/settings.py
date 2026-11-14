@@ -200,6 +200,7 @@ EMAIL_HOST_PASSWORD = env('EMAIL_PASSWORD')
 
 # Supabase Storage Configuration
 SUPABASE_URL = env('SUPABASE_URL', default='https://hsacrlaaucymzmctggwp.supabase.co')
+SUPABASE_ANON_KEY = env('SUPABASE_ANON_KEY', default='')
 SUPABASE_SERVICE_ROLE_KEY = env('SUPABASE_SERVICE_ROLE_KEY', default='')
 SUPABASE_STORAGE_BUCKET = env('SUPABASE_STORAGE_BUCKET', default='media')
 

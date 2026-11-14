@@ -1,11 +1,15 @@
+import os
+from django import forms
 from django.contrib import admin
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin, GroupAdmin as BaseGroupAdmin
+from django.core.exceptions import ValidationError
 from django.utils.html import format_html
 from unfold.admin import ModelAdmin, TabularInline
 from unfold.forms import AdminPasswordChangeForm, UserChangeForm, UserCreationForm
 from unfold.decorators import display
 from .models import Category, Company, Product
+from boycottIsrael.supabase_storage import upload_to_supabase
 
 # Style default Django Auth with Unfold
 admin.site.unregister(User)
@@ -20,7 +24,6 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
 @admin.register(Group)
 class GroupAdmin(BaseGroupAdmin, ModelAdmin):
     pass
-
 
 class ProductInline(TabularInline):
     model = Product
@@ -38,8 +41,56 @@ class CategoryAdmin(ModelAdmin):
     def products_count(self, obj):
         return f"{obj.products.count()} টি"
 
+class CompanyAdminForm(forms.ModelForm):
+    upload_file = forms.FileField(
+        required=False,
+        label="লোগো ফাইল নির্বাচন করুন (সুপাবেসে আপলোড হবে)",
+        help_text="কম্পিউটার থেকে লোগো নির্বাচন করুন। সর্বোচ্চ সাইজ: ২ মেগাবাইট (PNG, JPG, WebP, SVG)"
+    )
+    logo = forms.CharField(
+        required=False,
+        label="অথবা লোগোর সরাসরি URL পেস্ট করুন",
+        help_text="ফাইল নির্বাচন না করলে এখানে সরাসরি কোনো লোগো লিংক পেস্ট করতে পারেন।"
+    )
+
+    class Meta:
+        model = Company
+        fields = ['name', 'upload_file', 'logo']
+
+    def clean(self):
+        cleaned_data = super().clean()
+        upload_file = cleaned_data.get('upload_file')
+        logo_url = cleaned_data.get('logo')
+
+        if not upload_file and not logo_url:
+            raise ValidationError("অনুগ্রহ করে একটি লোগো ফাইল নির্বাচন করুন অথবা একটি লোগোর URL দিন।")
+
+        if upload_file:
+            max_size = 2 * 1024 * 1024
+            if upload_file.size > max_size:
+                size_mb = upload_file.size / (1024 * 1024)
+                raise ValidationError(f"লোগো ফাইলের সাইজ ২ মেগাবাইট (2 MB)-এর বেশি হতে পারবে না! আপনার ফাইলের সাইজ: {size_mb:.2f} MB")
+
+            ext = os.path.splitext(upload_file.name)[1].lower()
+            allowed = ['.png', '.jpg', '.jpeg', '.webp', '.svg']
+            if ext not in allowed:
+                raise ValidationError(f"ভুল ফরম্যাট! শুধুমাত্র {', '.join(allowed)} ফরম্যাটের লোগো গ্রহণযোগ্য।")
+
+        return cleaned_data
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        upload_file = self.cleaned_data.get('upload_file')
+        if upload_file:
+            public_url = upload_to_supabase(upload_file, folder="products")
+            instance.logo = public_url
+        if commit:
+            instance.save()
+        return instance
+
 @admin.register(Company)
 class CompanyAdmin(ModelAdmin):
+    form = CompanyAdminForm
     list_display = ['logo_preview', 'name', 'total_products', 'logo_link']
     search_fields = ['name']
     list_filter_submit = True
